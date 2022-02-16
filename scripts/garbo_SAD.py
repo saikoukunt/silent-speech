@@ -67,6 +67,9 @@ class channel():
     def setMin_Thresh(self, value):
         self.min_thresh = value
         
+    def getRaw(self):
+        return self.raw_data
+        
       
     #TO DO: MAKE SURE ARRAY OUT OF BOUNDS CHECK IS SUFFICIENT
     def smooth(self, raw):
