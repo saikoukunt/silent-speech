@@ -25,7 +25,49 @@ class channel():
         self.raw_data = data.deque()
        
         
+    def getData_Rate(self):
+        return self.data_rate
+    
+    def setData_Rate(self, value):
+        self.data_rate = value
         
+    def getData_Size(self):
+        return self.data_size
+    
+    def setData_Size(self, value):
+        self.data_size = value
+        
+    def isActive(self):
+        return self.active()
+    
+    def setActive(self, bool res):
+        self.active = res
+        
+    def getMax_Power(self):
+        return self.max_power
+    
+    def setMax_Power(self, value):
+        self.max_power = value
+    
+    def getMin_Power(self):
+        return self.min_power
+    
+    def setMin_Power(self, value):
+        self.min_power = value
+        
+    def getMax_Thresh(self):
+        return self.max_thresh
+    
+    def setMax_Thresh(self, value):
+        self.max_thresh = value
+        
+    def getMin_Thresh(self):
+        return self.min_thresh
+    
+    def setMin_Thresh(self, value):
+        self.min_thresh = value
+        
+      
     #TO DO: MAKE SURE ARRAY OUT OF BOUNDS CHECK IS SUFFICIENT
     def smooth(self, raw):
         raw = list(raw)
