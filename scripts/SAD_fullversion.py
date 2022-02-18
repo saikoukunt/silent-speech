@@ -34,10 +34,10 @@ frame_length = 80
 
 
 def channel_thread(channel, boolean):
-       
-        channel.inactivity_check()
-        boolean = channel.isActive()
-        
+    
+    channel.inactivity_check()
+    boolean = channel.isActive()
+    
 
 def controller_thread(data_list):
     
@@ -76,12 +76,7 @@ def controller_thread(data_list):
 
     #global boolean logic check
     channels = [chan1_active, chan2_active, chan3_active, chan4_active, chan5_active, chan6_active]
-    count = 0
-    for chan in channels:
-        if chan:
-            count = count + 1
-    num_active = count
-    
+    num_active = sum(channels)
     
     #Speech Event FSM
     if isSpeech:
