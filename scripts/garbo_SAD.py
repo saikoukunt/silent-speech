@@ -40,7 +40,7 @@ class channel():
     def isActive(self):
         return self.active()
     
-    def setActive(self, bool res):
+    def setActive(self, res):
         self.active = res
         
     def getMax_Power(self):
@@ -73,7 +73,6 @@ class channel():
       
     #TO DO: MAKE SURE ARRAY OUT OF BOUNDS CHECK IS SUFFICIENT
     def smooth(self, raw):
-        raw = list(raw)
         
         #large window to average over
         window = int(self.data_rate * 40)
@@ -96,13 +95,12 @@ class channel():
             ind1 = ind1 + skip
             ind2 = ind2 + skip
             
-        raw = raw.tolist()
         return raw
         
         
     def calculate(self, smoothed_envelope):
-        smoothed = list(smoothed_envelope)
-        return np.abs(np.diff(smoothed))
+        
+        return np.abs(np.diff(smoothed_envelope))
     
     def inactivity_check(self):
         data_frame = deque(self.calculate(self.smooth(self.raw_data)))
