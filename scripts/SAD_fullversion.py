@@ -5,6 +5,7 @@ Created on Wed Feb 16 16:21:45 2022
 @author: lwing
 """
 
+import Boolean
 import garbo_SAD
 import numpy as np
 from collections import deque
@@ -13,12 +14,12 @@ import threading
 
 
 #global boolean for each channel
-chan1_active = False
-chan2_active = False
-chan3_active = False
-chan4_active = False
-chan5_active = False
-chan6_active = False
+chan1_active = Boolean.boolean()
+chan2_active = Boolean.boolean()
+chan3_active = Boolean.boolean()
+chan4_active = Boolean.boolean()
+chan5_active = Boolean.boolean()
+chan6_active = Boolean.boolean()
 
 #variables for determining speech event
 num_active = 0          #number of active channels for a single cycle
@@ -27,7 +28,7 @@ active_count = 0        #number of speech events
 inactive_count = 0
 active_thresh = 3
 inactive_thresh = 2
-isSpeech = False
+isSpeech = Boolean.boolean()
 
 #frame_length is in ms
 frame_length = 80
@@ -36,7 +37,7 @@ frame_length = 80
 def channel_thread(channel, boolean):
     
     channel.inactivity_check()
-    boolean = channel.isActive()
+    boolean.setStatus(channel.isActive())
     
 
 def controller_thread(data_list):
@@ -54,6 +55,7 @@ def controller_thread(data_list):
     channel4 = garbo_SAD.channel(data_stream4, frame_length)
     channel5 = garbo_SAD.channel(data_stream5, frame_length)
     channel6 = garbo_SAD.channel(data_stream6, frame_length)
+    
     
   
     # creating threads
@@ -79,16 +81,16 @@ def controller_thread(data_list):
     num_active = sum(channels)
     
     #Speech Event FSM
-    if isSpeech:
+    if isSpeech.getStatus():
         if num_active < 2:
             inactive_count += 1
         else:
             inactive_count = 0
             
         if inactive_count >= inactive_thresh:
-            isSpeech = False
+            isSpeech.setStatus(False)
         else:
-            isSpeech = True
+            isSpeech.setStatus(True)
      
         
     else:
@@ -100,9 +102,9 @@ def controller_thread(data_list):
         
         #Speech Event conditional
         if active_count >= active_thresh:
-            isSpeech = True
+            isSpeech.setStatus(True)
         else:
-            isSpeech = False
+            isSpeech.setStatus(False)
             
             
             
