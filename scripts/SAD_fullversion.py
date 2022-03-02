@@ -39,6 +39,9 @@ def channel_thread(channel, boolean):
     channel.inactivity_check()
     boolean.setStatus(channel.isActive())
     
+def global_thread():
+    
+    
 
 def controller_thread(data_list):
     
