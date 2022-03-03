@@ -30,12 +30,34 @@ active_thresh = 3
 inactive_thresh = 2
 isSpeech = Boolean.boolean()
 
+#number of samples per packet
+num_samples = 1
+
 #frame_length is in ms
 frame_length = 80
 
-
+#WORK IN PROGRESS
 def channel_thread(channel, boolean):
-    
+    while True:
+        global num_samples
+        active_flag_curr = False
+        active_flag_prev = False
+        speech_event = deque()
+        channel.create_dataFrame()
+        for sample in range(num_samples):
+            channel.inactivity_check()
+            active_flag_prev = active_flag_curr
+            active_flag_curr = channel.isActive()
+            
+            #want to just add current value to queue for event recording
+            if active_flag_prev and active_flag_curr:
+                speech_event.append(sample)
+                boolean.setStatus(True)
+                
+            elif active_flag_prev and not active_flag_curr:
+                
+                boolean.setStatus(False)
+            
     channel.inactivity_check()
     boolean.setStatus(channel.isActive())
     
