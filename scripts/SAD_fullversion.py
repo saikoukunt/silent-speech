@@ -36,32 +36,35 @@ num_samples = 1
 #frame_length is in ms
 frame_length = 80
 
-#WORK IN PROGRESS
-def channel_thread(channel, boolean):
+#Each channel has access to the 'packet' struct which contains all 6 channels'
+#raw data as well as an array of booleans for channel activity
+#The global thread will poll over the struct's boolean_table to determine when
+#speech events occur
+#After a string of raw data has been fully processed, the channel thread will
+#wait indefinitely until it gets a new data set to process
+def channel_thread(channel, boolean, struct):
     while True:
         global num_samples
         active_flag_curr = False
-        active_flag_prev = False
-        speech_event = deque()
         channel.create_dataFrame()
-        for sample in range(num_samples):
+        for sample_idx in range(num_samples):
             channel.inactivity_check()
-            active_flag_prev = active_flag_curr
             active_flag_curr = channel.isActive()
             
-            #want to just add current value to queue for event recording
-            if active_flag_prev and active_flag_curr:
-                speech_event.append(sample)
+            #1 in the boolean table will represent true
+            if active_flag_curr:
+                struct.setBooleanTableEntry(channel.getChannelNum()-1,sample_idx, 1)
                 boolean.setStatus(True)
-                
-            elif active_flag_prev and not active_flag_curr:
-                
+            
+            #-1 in the boolean table will represent false
+            else:
+                struct.setBooleanTableEntry(channel.getChannelNum()-1,sample_idx, -1)
                 boolean.setStatus(False)
             
-    channel.inactivity_check()
-    boolean.setStatus(channel.isActive())
+        while len(channel.getPrepped()) == 0:
+            #do nothing, waiting for new raw data
     
-def global_thread():
+def global_thread(struct):
     
     
 
@@ -74,12 +77,12 @@ def controller_thread(data_list):
     data_stream5 = data_list[4]
     data_stream6 = data_list[5]
     
-    channel1 = garbo_SAD.channel(data_stream1, frame_length)
-    channel2 = garbo_SAD.channel(data_stream2, frame_length)
-    channel3 = garbo_SAD.channel(data_stream3, frame_length)
-    channel4 = garbo_SAD.channel(data_stream4, frame_length)
-    channel5 = garbo_SAD.channel(data_stream5, frame_length)
-    channel6 = garbo_SAD.channel(data_stream6, frame_length)
+    channel1 = garbo_SAD.channel(data_stream1, frame_length, 1)
+    channel2 = garbo_SAD.channel(data_stream2, frame_length, 2)
+    channel3 = garbo_SAD.channel(data_stream3, frame_length, 3)
+    channel4 = garbo_SAD.channel(data_stream4, frame_length, 4)
+    channel5 = garbo_SAD.channel(data_stream5, frame_length, 5)
+    channel6 = garbo_SAD.channel(data_stream6, frame_length, 6)
     
     
   
