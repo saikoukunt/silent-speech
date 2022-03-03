@@ -10,7 +10,7 @@ import numpy as np
 from statistics import mean
 
 class channel():
-    def __init__(self, data, frame_length):
+    def __init__(self, data, frame_length, channel_num):
         super().__init__()
     
         #frame_length is time
@@ -23,6 +23,8 @@ class channel():
         self.min_thresh = 1
     
         self.raw_data = data.deque()
+        self.prepped_data_frame
+        self.channel_num = channel_num
        
         
     def getData_Rate(self):
@@ -69,6 +71,12 @@ class channel():
         
     def getRaw(self):
         return self.raw_data
+    
+    def getPrepped(self):
+        return self.prepped_data_frame
+    
+    def getChannelNum(self):
+        return self.channel_num
         
       
     #TO DO: MAKE SURE ARRAY OUT OF BOUNDS CHECK IS SUFFICIENT
@@ -102,9 +110,11 @@ class channel():
         
         return np.abs(np.diff(smoothed_envelope))
     
+    def create_dataFrame(self):
+        self.prepped_data_frame = deque(self.calculate(self.smooth(self.raw_data)))
+    
     def inactivity_check(self):
-        data_frame = deque(self.calculate(self.smooth(self.raw_data)))
-        sample = data_frame.leftpop()
+        sample = self.prepped_data_frame.leftpop()
         
         if self.active:
             if sample > (self.max_power * self.max_thresh):
