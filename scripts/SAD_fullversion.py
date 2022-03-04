@@ -65,7 +65,11 @@ def channel_thread(channel, boolean, struct):
             #do nothing, waiting for new raw data
     
 def global_thread(struct):
-    
+    while True:
+        global num_samples
+        
+        for sample_idx in range(num_samples):
+            
     
 
 def controller_thread(data_list):
