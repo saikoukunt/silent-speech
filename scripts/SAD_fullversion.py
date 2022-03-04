@@ -70,6 +70,40 @@ def global_thread(struct):
         
         for sample_idx in range(num_samples):
             
+            #waiting for each channel to finish its inactivity check on the current sample
+            while (np.count_nonzero(bool_table[:,sample_idx] == 1) + np.count_nonzero(bool_table[:,sample_idx] == -1)) < 6 :
+                #do nothing
+            
+            num_active = np.count_nonzero(bool_table[:,sample_idx] == 1)   
+            
+            if isSpeech.getStatus():
+                if num_active < 2:
+                    inactive_count += 1
+                else:
+                    inactive_count = 0
+            
+                if inactive_count >= inactive_thresh:
+                    isSpeech.setStatus(False)
+                else:
+                    isSpeech.setStatus(True)
+     
+        
+            else:
+                #updating speech event count
+                if num_active >= 2:
+                    active_count += 1
+                else:
+                    active_count = 0
+        
+                #Speech Event conditional
+                if active_count >= active_thresh:
+                    isSpeech.setStatus(True)
+                else:
+                    isSpeech.setStatus(False)
+                
+                
+                
+                
     
 
 def controller_thread(data_list):
