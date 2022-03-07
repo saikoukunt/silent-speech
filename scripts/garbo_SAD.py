@@ -73,6 +73,9 @@ class channel():
     def getRaw(self):
         return self.raw_data
     
+    def setRaw(self, data):
+        self.raw_data = data.deque()
+    
     def getPrepped(self):
         return self.prepped_data_frame
     

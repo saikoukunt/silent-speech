@@ -65,7 +65,7 @@ def channel_thread(channel, boolean, struct):
                 boolean.setStatus(False)
         
         channel.setHasData(False)    
-        while len(channel.getPrepped()) == 0:
+        while not channel.getHasData():
             #do nothing, waiting for new raw data
             
 def create_SpeechDataQueues():
@@ -130,8 +130,24 @@ def global_thread(struct):
         while globalIsFinished.getStatus():
             #do nothing until new data is sent
                 
+'''
+TO DO:
+    Initial struct creation
+    Handle new data passing into global and channel threads
+    Initial thread creation
 
-def controller_thread(data_list):
+'''
+        
+
+if __name__ == "__main__":
+    
+    global num_samples
+    data_list = getDataStream()
+    
+    '''
+    manipulate data from "getDataStream"
+    
+    '''
     
     data_stream1 = data_list[0]
     data_stream2 = data_list[1]
@@ -147,73 +163,54 @@ def controller_thread(data_list):
     channel5 = garbo_SAD.channel(data_stream5, frame_length, 5)
     channel6 = garbo_SAD.channel(data_stream6, frame_length, 6)
     
+    data_struct = SAD_struct.sad_struct(data_list,num_samples)
     
-  
-    # creating threads
-    t1 = threading.Thread(target=channel_thread, args=(channel1, chan1_active,))
-    t2 = threading.Thread(target=channel_thread, args=(channel2, chan2_active,)) 
-    t3 = threading.Thread(target=channel_thread, args=(channel3, chan3_active,))
-    t4 = threading.Thread(target=channel_thread, args=(channel4, chan4_active,)) 
-    t5 = threading.Thread(target=channel_thread, args=(channel5, chan5_active,))
-    t6 = threading.Thread(target=channel_thread, args=(channel6, chan6_active,))
+    t1 = threading.Thread(target=channel_thread, args=(channel1, chan1_active, data_struct))
+    t2 = threading.Thread(target=channel_thread, args=(channel2, chan2_active, data_struct)) 
+    t3 = threading.Thread(target=channel_thread, args=(channel3, chan3_active, data_struct))
+    t4 = threading.Thread(target=channel_thread, args=(channel4, chan4_active, data_struct)) 
+    t5 = threading.Thread(target=channel_thread, args=(channel5, chan5_active, data_struct))
+    t6 = threading.Thread(target=channel_thread, args=(channel6, chan6_active, data_struct))
+    global_thread = threading.Thread(target=global_thread, args=(data_struct,))
     
-    threads = [t1, t2, t3, t4, t5, t6]
+    
+    threads = [t1, t2, t3, t4, t5, t6, global_thread]
     
     #starting threads
     for t in threads:
         t.start()
     
-    #joining threads
-    for t in threads:
-        t.join()
-
-    #global boolean logic check
-    channels = [chan1_active, chan2_active, chan3_active, chan4_active, chan5_active, chan6_active]
-    num_active = sum(channels)
-    
-    #Speech Event FSM
-    if isSpeech.getStatus():
-        if num_active < 2:
-            inactive_count += 1
-        else:
-            inactive_count = 0
-            
-        if inactive_count >= inactive_thresh:
-            isSpeech.setStatus(False)
-        else:
-            isSpeech.setStatus(True)
-     
-        
-    else:
-        #updating speech event count
-        if num_active >= 2:
-            active_count += 1
-        else:
-            active_count = 0
-        
-        #Speech Event conditional
-        if active_count >= active_thresh:
-            isSpeech.setStatus(True)
-        else:
-            isSpeech.setStatus(False)
-            
-            
-            
-def main_task():
-    #leaving blank for now, controller_thread assumes a list of deques
-    data = getDataStream()
-    
-    '''
-    manipulate data from "getDataStream"
-    
-    '''
-    controller = threading.Thread(target=controller_thread, args=(data,))
-    controller.start()
-    controller.join()
-        
-
-if __name__ == "__main__":
-    
     while True:
-        main_task()
-        
+        if globalIsFinished.getStatus():
+            
+            data_list = getDataStream()
+            '''
+            manipulate data from "getDataStream"
+    
+            '''
+            data_struct.setDataTable(data_list)
+            
+            channel1.setRaw(data_list[0])
+            channel2.setRaw(data_list[1])
+            channel3.setRaw(data_list[2])
+            channel4.setRaw(data_list[3])
+            channel5.setRaw(data_list[4])
+            channel6.setRaw(data_list[5])
+            
+            channel1.setHasData(True)
+            channel2.setHasData(True)
+            channel3.setHasData(True)
+            channel4.setHasData(True)
+            channel5.setHasData(True)
+            channel6.setHasData(True)
+            
+            globalIsFinished.setStatus(False)
+            
+            
+            
+            
+            
+            
+            
+            
+            
