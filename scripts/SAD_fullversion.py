@@ -7,6 +7,7 @@ Created on Wed Feb 16 16:21:45 2022
 
 import Boolean
 import garbo_SAD
+import SAD_struct
 import numpy as np
 from collections import deque
 import threading
