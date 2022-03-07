@@ -7,7 +7,7 @@ Created on Thu Mar  3 11:57:14 2022
 
 #Goal here is to have one object that the global thread can poll over rather
 #than pulling information from a bunch of separate threads
-
+import numpy as np
 
 class sad_struct():
     def __init__(self, big_data_array, num_samples):
@@ -25,8 +25,17 @@ class sad_struct():
     def setBooleanTableEntry(self, channel, sample_index, val):
         self.boolean_table[channel, sample_index] = val
     
+    def setDataTable(self, data_array):
+        self.data_table = data_array
+        
+    def createBooleanTable(self):
+        self.boolean_table = np.zeros([6,self.num_samples])
+    
     def getDataTable(self):
         return self.data_table
+    
+    def getDataTableEntry(self, channel, sample_index):
+        return self.data_table[channel, sample_index]
     
     def getBooleanTable(self):
         return self.boolean_table
@@ -38,7 +47,7 @@ class sad_struct():
         return self.boolean_table[:, col]
         
     def getBooleanTableEntry(self, channel, sample_index):
-        return boolean_table[channel, sample_index]
+        return self.boolean_table[channel, sample_index]
         
         
      

@@ -21,6 +21,8 @@ chan4_active = Boolean.boolean()
 chan5_active = Boolean.boolean()
 chan6_active = Boolean.boolean()
 
+globalIsFinished = Boolean.boolean()
+
 #variables for determining speech event
 num_active = 0          #number of active channels for a single cycle
 num_inactive = 0
@@ -45,6 +47,7 @@ frame_length = 80
 def channel_thread(channel, boolean, struct):
     while True:
         global num_samples
+        channel.setHasData(True)
         active_flag_curr = False
         channel.create_dataFrame()
         for sample_idx in range(num_samples):
@@ -60,21 +63,28 @@ def channel_thread(channel, boolean, struct):
             else:
                 struct.setBooleanTableEntry(channel.getChannelNum()-1,sample_idx, -1)
                 boolean.setStatus(False)
-            
+        
+        channel.setHasData(False)    
         while len(channel.getPrepped()) == 0:
             #do nothing, waiting for new raw data
-    
+            
+def create_SpeechDataQueues():
+    return [deque(),deque(),deque(),deque(),deque(),deque()]
+
+
 def global_thread(struct):
     while True:
         global num_samples
+        globalIsFinished.setStatus(False)
+        speech_data = create_SpeechDataQueues()
         
         for sample_idx in range(num_samples):
             
             #waiting for each channel to finish its inactivity check on the current sample
-            while (np.count_nonzero(bool_table[:,sample_idx] == 1) + np.count_nonzero(bool_table[:,sample_idx] == -1)) < 6 :
+            while (np.count_nonzero(struct.getBooleanTable()[:,sample_idx] == 1) + np.count_nonzero(struct.getBooleanTable()[:,sample_idx] == -1)) < 6 :
                 #do nothing
             
-            num_active = np.count_nonzero(bool_table[:,sample_idx] == 1)   
+            num_active = np.count_nonzero(struct.getBooleanTable()[:,sample_idx] == 1)   
             
             if isSpeech.getStatus():
                 if num_active < 2:
@@ -84,8 +94,18 @@ def global_thread(struct):
             
                 if inactive_count >= inactive_thresh:
                     isSpeech.setStatus(False)
+                    
+                    '''
+                    
+                    send data in speech_data to next module
+                    
+                    '''
+                    speech_data = create_SpeechDataQueues()
+                    
                 else:
                     isSpeech.setStatus(True)
+                    for idx, queue in enumerate(speech_data):
+                        queue.append(struct.getDataTableEntry(idx-1, sample_idx))
      
         
             else:
@@ -98,13 +118,18 @@ def global_thread(struct):
                 #Speech Event conditional
                 if active_count >= active_thresh:
                     isSpeech.setStatus(True)
+                    for idx, queue in enumerate(speech_data):
+                        queue.append(struct.getDataTableEntry(idx-1, sample_idx))
+                        
                 else:
                     isSpeech.setStatus(False)
+                    
+        globalIsFinished.setStatus(True)
+        struct.createBooleanTable()             #resetting boolean table
+        
+        while globalIsFinished.getStatus():
+            #do nothing until new data is sent
                 
-                
-                
-                
-    
 
 def controller_thread(data_list):
     

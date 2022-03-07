@@ -25,6 +25,7 @@ class channel():
         self.raw_data = data.deque()
         self.prepped_data_frame
         self.channel_num = channel_num
+        self.hasData = True
        
         
     def getData_Rate(self):
@@ -77,6 +78,12 @@ class channel():
     
     def getChannelNum(self):
         return self.channel_num
+    
+    def getHasData(self):
+        return self.hasData
+    
+    def setHasData(self, value):
+        self.hasData = value
         
       
     #TO DO: MAKE SURE ARRAY OUT OF BOUNDS CHECK IS SUFFICIENT
