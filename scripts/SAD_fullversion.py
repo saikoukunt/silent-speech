@@ -57,16 +57,17 @@ def channel_thread(channel, boolean, struct):
             
             #1 in the boolean table will represent true
             if active_flag_curr:
-                struct.setBooleanTableEntry(channel.getChannelNum()-1,sample_idx, 1)
+                struct.setBooleanTableEntry(channel.getChannelNum(),sample_idx, 1)
                 boolean.setStatus(True)
             
             #-1 in the boolean table will represent false
             else:
-                struct.setBooleanTableEntry(channel.getChannelNum()-1,sample_idx, -1)
+                struct.setBooleanTableEntry(channel.getChannelNum(),sample_idx, -1)
                 boolean.setStatus(False)
         
         channel.setHasData(False)    
         while not channel.getHasData():
+            pass
             #do nothing, waiting for new raw data
             
 def create_SpeechDataQueues():
@@ -83,6 +84,7 @@ def global_thread(struct):
             
             #waiting for each channel to finish its inactivity check on the current sample
             while (np.count_nonzero(struct.getBooleanTable()[:,sample_idx] == 1) + np.count_nonzero(struct.getBooleanTable()[:,sample_idx] == -1)) < 6 :
+                pass
                 #do nothing
             
             num_active = np.count_nonzero(struct.getBooleanTable()[:,sample_idx] == 1)   
@@ -106,7 +108,7 @@ def global_thread(struct):
                 else:
                     isSpeech.setStatus(True)
                     for idx, queue in enumerate(speech_data):
-                        queue.append(struct.getDataTableEntry(idx-1, sample_idx))
+                        queue.append(struct.getDataTableEntry(idx, sample_idx))
      
         
             else:
@@ -120,7 +122,7 @@ def global_thread(struct):
                 if active_count >= active_thresh:
                     isSpeech.setStatus(True)
                     for idx, queue in enumerate(speech_data):
-                        queue.append(struct.getDataTableEntry(idx-1, sample_idx))
+                        queue.append(struct.getDataTableEntry(idx, sample_idx))
                         
                 else:
                     isSpeech.setStatus(False)
@@ -130,7 +132,7 @@ def global_thread(struct):
         
         while globalIsFinished.getStatus():
             #do nothing until new data is sent
-                
+            pass    
 '''
 TO DO:
     Initial struct creation

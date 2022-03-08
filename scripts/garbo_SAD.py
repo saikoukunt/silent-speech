@@ -23,8 +23,8 @@ class channel():
         self.min_thresh = 1
     
         self.raw_data = data.deque()
-        self.prepped_data_frame
-        self.channel_num = channel_num
+        self.prepped_data_frame = deque()
+        self.channel_num = channel_num -1
         self.hasData = True
        
         
