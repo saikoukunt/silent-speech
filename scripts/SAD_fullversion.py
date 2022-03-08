@@ -47,7 +47,6 @@ frame_length = 80
 #wait indefinitely until it gets a new data set to process
 def channel_thread(channel, boolean, struct):
     while True:
-        global num_samples
         channel.setHasData(True)
         active_flag_curr = False
         channel.create_dataFrame()
@@ -76,7 +75,6 @@ def create_SpeechDataQueues():
 
 def global_thread(struct):
     while True:
-        global num_samples
         globalIsFinished.setStatus(False)
         speech_data = create_SpeechDataQueues()
         
@@ -144,7 +142,6 @@ TO DO:
 
 if __name__ == "__main__":
     
-    global num_samples
     data_list = getDataStream()
     
     '''
