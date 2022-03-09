@@ -10,7 +10,7 @@ import numpy as np
 from statistics import mean
 
 class channel():
-    def __init__(self, data, frame_length):
+    def __init__(self, data, frame_length, channel_num):
         super().__init__()
     
         #frame_length is time
@@ -23,6 +23,9 @@ class channel():
         self.min_thresh = 1
     
         self.raw_data = data.deque()
+        self.prepped_data_frame = deque()
+        self.channel_num = channel_num -1
+        self.hasData = True
        
         
     def getData_Rate(self):
@@ -40,7 +43,7 @@ class channel():
     def isActive(self):
         return self.active()
     
-    def setActive(self, bool res):
+    def setActive(self, res):
         self.active = res
         
     def getMax_Power(self):
@@ -69,11 +72,25 @@ class channel():
         
     def getRaw(self):
         return self.raw_data
+    
+    def setRaw(self, data):
+        self.raw_data = data.deque()
+    
+    def getPrepped(self):
+        return self.prepped_data_frame
+    
+    def getChannelNum(self):
+        return self.channel_num
+    
+    def getHasData(self):
+        return self.hasData
+    
+    def setHasData(self, value):
+        self.hasData = value
         
       
     #TO DO: MAKE SURE ARRAY OUT OF BOUNDS CHECK IS SUFFICIENT
     def smooth(self, raw):
-        raw = list(raw)
         
         #large window to average over
         window = int(self.data_rate * 40)
@@ -83,7 +100,7 @@ class channel():
         
         ind1 = 0
         ind2 = window
-        raw = np.array(raw)
+        copy = np.copy(np.array(raw))
         
         while ind1 < self.data_size:
             
@@ -91,39 +108,40 @@ class channel():
             if ind2 > self.data_size:
                 ind2 = int(self.data_size)
                 
-            val = mean(raw[ind1:ind2])
-            raw[ind1:ind2] = val
+            val = mean(copy[ind1:ind2])
+            copy[ind1:ind2] = val
             ind1 = ind1 + skip
             ind2 = ind2 + skip
             
-        raw = raw.tolist()
-        return raw
+        return copy
         
         
     def calculate(self, smoothed_envelope):
-        smoothed = list(smoothed_envelope)
-        return np.abs(np.diff(smoothed))
+        
+        return np.abs(np.diff(smoothed_envelope))
+    
+    def create_dataFrame(self):
+        self.prepped_data_frame = deque(self.calculate(self.smooth(self.raw_data)))
     
     def inactivity_check(self):
-        data_frame = deque(self.calculate(self.smooth(self.raw_data)))
-        frame = data_frame.leftpop()
+        sample = self.prepped_data_frame.leftpop()
         
         if self.active:
-            if frame > (self.max_power * self.max_thresh):
+            if sample > (self.max_power * self.max_thresh):
                 self.active = True
             else:
                 self.active = False
-            if frame > self.max_power:
-                self.max_power = frame
+            if sample > self.max_power:
+                self.max_power = sample
             
             
         else:
-            if frame < (self.min_power * self.min_thresh):
+            if sample < (self.min_power * self.min_thresh):
                 self.active = False
             else:
                 self.active = True
-            if frame < self.min_power:
-                self.min_power = frame
+            if sample < self.min_power:
+                self.min_power = sample
             
             
         
