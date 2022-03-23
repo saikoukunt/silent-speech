@@ -23,22 +23,22 @@ class Timer(tk.Tk):
         self.vocal_label = ttk.Label(
             self, 
             text=f'{vocal}: word {self.index+1} of {len(self.list)}', 
-            font=("Helvetica Neue Thin", 100),
+            font=("Helvetica Neue Thin", 50),
             foreground='#0079BF')
         self.word = ttk.Label(
             self, 
             text='word', 
-            font=("Helvetica Neue Thin", 300))
+            font=("Helvetica Neue Thin", 150))
         self.countdown_start = countdown_start
         self.countdown = ttk.Label(
             self,
             text=f'{self.countdown_start}',
-            font=("Helvetica Neue Thin", 150)
+            font=("Helvetica Neue Thin", 75)
         )
         self.next_prompt = ttk.Label(
             self,
             text="Press 'r' to repeat the previous word \n or spacebar to record the next word",
-            font=("Helvetica Neue Thin", 100)
+            font=("Helvetica Neue Thin", 75)
         )
 
         # init file
