@@ -2,7 +2,7 @@ import timer
 
 tim = timer.Timer("vocalized",5,"test.txt")
 
-# word_list = ['yes', 'no']
+#word_list = ['yes', 'no']
 
 word_list = ["yes", "no",
 "zero",
@@ -36,9 +36,10 @@ word_list = ["yes", "no",
 "microwave",
 "sink",
 "toilet"]
+
+
+
 word_list = word_list * 3
-
-
 tim.run(word_list)
 
 tim.mainloop()
