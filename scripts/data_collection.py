@@ -1,6 +1,6 @@
 import timer
 
-tim = timer.Timer("vocalized",5,"test.txt")
+tim = timer.Timer("mouthed",5,"Mouthed_Full_6_set2.txt")
 
 #word_list = ['yes', 'no']
 
