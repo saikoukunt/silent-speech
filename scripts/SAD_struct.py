@@ -19,7 +19,7 @@ class sad_struct():
         self.data_table = big_data_array
         
         #boolean table for global to poll over for speech events
-        self.boolean_table = np.zeros([6,self.num_samples])
+        self.boolean_table = np.zeros([6,self.num_samples/20])
         
     
     def setBooleanTableEntry(self, channel, sample_index, val):
@@ -29,7 +29,7 @@ class sad_struct():
         self.data_table = data_array
         
     def createBooleanTable(self):
-        self.boolean_table = np.zeros([6,self.num_samples])
+        self.boolean_table = np.zeros([6,self.num_samples/20])
     
     def getDataTable(self):
         return self.data_table

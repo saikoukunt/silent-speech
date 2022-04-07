@@ -89,39 +89,51 @@ class channel():
         self.hasData = value
         
       
+    def rms(self, raw):
+        rms_window = deque([0,0,0,0,0])
+        rms_data = np.zeros(len(raw))
+        for i, sample in enumerate(raw):
+            rms_window.popleft()
+            rms_window.append(sample)
+            val = np.sqrt(sum(np.square(rms_window)/5))
+            rms_data[i] = val
+    
+    
     #TO DO: MAKE SURE ARRAY OUT OF BOUNDS CHECK IS SUFFICIENT
-    def smooth(self, raw):
+    def smooth(self, rms_data):
         
-        #large window to average over
-        window = int(self.data_rate * 40)
+        #large window to average over; sampling rate is 1000 Hz; each sample is a millisecond
+        window = 40
         
         #overlap interval
-        skip = int(self.data_rate * 20)
+        skip = 20
         
         ind1 = 0
         ind2 = window
-        copy = np.copy(np.array(raw))
-        
-        while ind1 < self.data_size:
+        #assuming that the packet size i.e. length of raw data and rms_data will be a multiple of 20
+        downsampled = np.zeros(int(len(rms_data)/20))
+        i = 0
+        while ind1 < len(rms_data):
             
             #remaining data less than window size, avoid array out of bounds
-            if ind2 > self.data_size:
-                ind2 = int(self.data_size)
+            if ind2 > len(rms_data):
+                ind2 = len(rms_data)-1
                 
-            val = mean(copy[ind1:ind2])
-            copy[ind1:ind2] = val
+            val = np.mean(rms_data[ind1:ind2], dtype=np.float64)
+            downsampled[i] = val
             ind1 = ind1 + skip
             ind2 = ind2 + skip
+            i = i+1
             
-        return copy
-        
+        return downsampled
         
     def calculate(self, smoothed_envelope):
         
         return np.abs(np.diff(smoothed_envelope))
     
     def create_dataFrame(self):
-        self.prepped_data_frame = deque(self.calculate(self.smooth(self.raw_data)))
+        #downsampled version so len is 1/20 raw len
+        self.prepped_data_frame = deque(self.calculate(self.smooth(self.rms((self.raw_data)))))
     
     def inactivity_check(self):
         sample = self.prepped_data_frame.leftpop()

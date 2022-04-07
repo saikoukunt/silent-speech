@@ -50,7 +50,8 @@ def channel_thread(channel, boolean, struct):
         channel.setHasData(True)
         active_flag_curr = False
         channel.create_dataFrame()
-        for sample_idx in range(num_samples):
+        x = len(channel.getPrepped())
+        for sample_idx in range(x):
             channel.inactivity_check()
             active_flag_curr = channel.isActive()
             
@@ -77,10 +78,10 @@ def global_thread(struct):
     while True:
         globalIsFinished.setStatus(False)
         speech_data = create_SpeechDataQueues()
-        
-        for sample_idx in range(num_samples):
+        bool_len = len(struct.getBooleanTableRow())
+        for sample_idx in range(bool_len):
             
-            #waiting for each channel to finish its inactivity check on the current sample
+            #waiting for each channel to finish its inactivity check on the current downsampled sample
             while (np.count_nonzero(struct.getBooleanTable()[:,sample_idx] == 1) + np.count_nonzero(struct.getBooleanTable()[:,sample_idx] == -1)) < 6 :
                 pass
                 #do nothing
@@ -120,7 +121,9 @@ def global_thread(struct):
                 if active_count >= active_thresh:
                     isSpeech.setStatus(True)
                     for idx, queue in enumerate(speech_data):
-                        queue.append(struct.getDataTableEntry(idx, sample_idx))
+                        for i in range(20):
+                            raw_index = int((20 * idx)+i)
+                            queue.append(struct.getDataTableEntry(idx, raw_index))
                         
                 else:
                     isSpeech.setStatus(False)
@@ -131,13 +134,7 @@ def global_thread(struct):
         while globalIsFinished.getStatus():
             #do nothing until new data is sent
             pass    
-'''
-TO DO:
-    Initial struct creation
-    Handle new data passing into global and channel threads
-    Initial thread creation
 
-'''
         
 
 if __name__ == "__main__":
