@@ -97,6 +97,8 @@ class channel():
             rms_window.append(sample)
             val = np.sqrt(sum(np.square(rms_window)/5))
             rms_data[i] = val
+        
+        return rms_data
     
     
     #TO DO: MAKE SURE ARRAY OUT OF BOUNDS CHECK IS SUFFICIENT
