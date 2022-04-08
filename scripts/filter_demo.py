@@ -24,7 +24,6 @@ print("Data Sample:" + str(fpath_h5))
 
 ch = "CH1" # Channel
 sr = header["sampling rate"] 
-resolution = 10 # Resolution (number of available bits)
 
 signal_raw = np.array(data[ch])
 signal_raw = transfer_function(signal_raw)
@@ -34,7 +33,7 @@ signal_meancorrect = signal_raw - np.mean(signal_raw)
 
 #60Hz Notch Filter for Power Line Noise
 b, a = iirnotch(60, 30, 1000)
-signal_notched = filtfilt(b, a, signal_meancorrect)
+signal_notched = filtfilt(b, a, signal_raw)
 
 # [Band Pass to demonstrate most prominent frequency range]
 low_cutoff = 20
