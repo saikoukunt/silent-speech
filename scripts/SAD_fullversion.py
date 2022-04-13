@@ -107,7 +107,9 @@ def global_thread(struct):
                 else:
                     isSpeech.setStatus(True)
                     for idx, queue in enumerate(speech_data):
-                        queue.append(struct.getDataTableEntry(idx, sample_idx))
+                        for i in range(20):
+                            raw_index = int((20 * sample_idx)+i)
+                            queue.append(struct.getDataTableEntry(idx, raw_index))
      
         
             else:
@@ -122,7 +124,7 @@ def global_thread(struct):
                     isSpeech.setStatus(True)
                     for idx, queue in enumerate(speech_data):
                         for i in range(20):
-                            raw_index = int((20 * idx)+i)
+                            raw_index = int((20 * sample_idx)+i)
                             queue.append(struct.getDataTableEntry(idx, raw_index))
                         
                 else:
