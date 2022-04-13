@@ -120,6 +120,7 @@ def global_thread(struct):
                     active_count = 0
         
                 #Speech Event conditional
+                #test
                 if active_count >= active_thresh:
                     isSpeech.setStatus(True)
                     for idx, queue in enumerate(speech_data):
