@@ -2,13 +2,11 @@ from pylsl import StreamInlet, resolve_stream
 import csv
 import numpy as np
 
-
 class EMGStream:
-    def __init__(self,output):
+    def __init__(self):
         self.sample_buffer = np.zeros(shape=(240, 7))
-        self.output = output
 
-    def get_buffer(self):
+    def get_buffer(self, output):
         streams = resolve_stream('name', 'OpenSignals')
         inlet = StreamInlet(streams[0])
         row = 0
@@ -25,5 +23,5 @@ class EMGStream:
             row = row + 1
             if(row == 240):
                 row = 0
-                print(self.sample_buffer)
+                output.put(self.sample_buffer)
                 #np.save("sample_buffer", sample_buffer)
