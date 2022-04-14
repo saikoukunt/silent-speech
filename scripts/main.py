@@ -19,6 +19,7 @@ if __name__ == '__main__':
 	p_filter.join()
 
 	while True:
+		print("TEST")
 		if not q_filter_to_sad.empty():
 			print(q_filter_to_sad.get())
 # p_sad = Process(target=, args=(q,))
