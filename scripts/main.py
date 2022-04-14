@@ -12,16 +12,15 @@ q_sad_to_ml = Queue()
 p_stream = Process(target=stream.get_buffer, args=(q_stream_to_filter,))
 p_filter = Process(target=filter.run, args=(q_stream_to_filter,q_filter_to_sad,))
 
-p_stream.start()
-p_stream.join()
+if __name__ == '__main__':
+	p_stream.start()
+	p_filter.start()
+	p_stream.join()
+	p_filter.join()
 
-p_filter.start()
-p_filter.join()
-
-
-while True:
-	if not q_filter_to_sad.empty():
-		print(q_filter_to_sad.get())
+	while True:
+		if not q_filter_to_sad.empty():
+			print(q_filter_to_sad.get())
 # p_sad = Process(target=, args=(q,))
 # p_ml = Process(target=, args=(q,))
 
