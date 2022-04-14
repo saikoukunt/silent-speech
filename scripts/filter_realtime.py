@@ -2,7 +2,7 @@ import time
 import numpy as np
 from scipy.signal import filtfilt, butter, iirnotch
 
-class Filter(self):
+class Filter():
   def __init__(self):
     #60Hz Notch Filter for Power Line Noise
     b_notch, a_notch = iirnotch(60, 30, 1000)
