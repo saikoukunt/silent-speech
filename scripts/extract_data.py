@@ -24,7 +24,6 @@ def extract_data(signal, timestamps):
     mac = lines[1][4:21]
     header = json.loads(lines[1][2:])[mac]
     start_time = header['date'][:5] + "0" + header['date'][5:] + "T" + header['time'] + "-05"
-    print(start_time)
     start_time = int(dateutil.parser.isoparse(start_time).timestamp()*1000)
 
     # extract data and convert to voltage in mV
@@ -45,8 +44,8 @@ def extract_data(signal, timestamps):
         else:
             ends.append(int(int(toks[2])/1000000))
 
-    starts = np.array(starts) - start_time + 750
-    ends = np.array(ends) - start_time + 750
+    starts = np.array(starts) - start_time + 770
+    ends = np.array(ends) - start_time + 770
 
     return data, words, starts, ends
 
