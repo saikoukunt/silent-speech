@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from extract_data import extract_data
 
-data, words, starts, ends = extract_data("../data/single_binary.txt","../data/single_binary_times.txt")
+data, words, starts, ends = extract_data("../data/Vocal_YN_6.txt","Vocal_YN_6.txt")
 
 plt.figure(figsize=(20,8))
 for i in range(6):

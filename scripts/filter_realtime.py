@@ -19,11 +19,25 @@ class Filter():
     return (((np.array(signal) / 2**6) - 0.5) * 3300) / 1009
 
   def run(self, input, output):
-    while not input.empty():
-        raw_data = input.get()
-        #print(raw_data[:,1:5])
-        raw_data[:,1:5] = self.transfer_function1(raw_data[:,1:5])
-        raw_data[:,5:] = self.transfer_function2(raw_data[:,5:])
-        raw_data[:,1:] = filtfilt(self.b_notch, self.a_notch, raw_data[:,1:], axis = 0)
-        raw_data[:,1:] = filtfilt(self.b, self.a, raw_data[:,1:], axis = 0)
-        output.put(raw_data)
+    while True:
+    	if (not input.empty()):
+	        raw_data = input.get()
+
+	        #print("\nTESTfilt: ", raw_data[:,1:5])
+	        #with open("testunfilt.txt", "a") as f:
+	        #	np.savetxt(f, raw_data)
+	        	#f.write(str(raw_data))
+	        #	f.write("\n")
+	        
+	        raw_data[:,1:5] = self.transfer_function1(raw_data[:,1:5])
+	        raw_data[:,5:] = self.transfer_function2(raw_data[:,5:])
+	        raw_data[:,1:] = filtfilt(self.b_notch, self.a_notch, raw_data[:,1:], axis = 0)
+	        raw_data[:,1:] = filtfilt(self.b, self.a, raw_data[:,1:], axis = 0)
+
+	        
+	        #with open("testfilt.txt", "a") as f:
+	        #	np.savetxt(f, raw_data)
+	        	#f.write(str(raw_data))
+	        #	f.write("\n")
+
+	        output.put(raw_data)

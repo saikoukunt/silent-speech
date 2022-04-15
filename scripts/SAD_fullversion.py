@@ -141,10 +141,10 @@ class SAD():
     
             
 
-    def run(self):
+    def run(self, input, output):
         
         data_list = getDataStream()
-        
+        #data_list = input.get()
         '''
         manipulate data from "getDataStream"
         
@@ -185,6 +185,7 @@ class SAD():
             if self.globalIsFinished.getStatus():
                 
                 data_list = getDataStream()
+                #data_list = input.get()
                 '''
                 manipulate data from "getDataStream"
         
