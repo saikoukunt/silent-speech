@@ -1,22 +1,31 @@
-from pylsl import StreamInlet, resolve_stream
 import csv
+from bitalino import BITalino
+
 import numpy as np
+
+macAddress = "20:19:07:00:80:4C"
+batteryThreshold = 30
+acqChannels = [0, 1, 2, 3, 4, 5]
+samplingRate = 1000
+nSamples = 10
 
 class EMGStream:
     def __init__(self):
         self.sample_buffer = np.zeros(shape=(240, 7))
+        self.device = BITalino(macAddress)
+        self.device.battery(batteryThreshold)
+        print(self.device.version())        
 
     def get_buffer(self, output):
-        streams = resolve_stream('name', 'OpenSignals')
-        inlet = StreamInlet(streams[0])
+        
+        self.device.start(samplingRate, acqChannels)
         row = 0
 
         while True:
             # get a new sample (you can also omit the timestamp part if you're not
             # interested in it)
-            sample, timestamp = inlet.pull_sample()
+            sample = (device.read(nSamples)
             sample.pop(0)
-            sample.insert(0, timestamp)
             self.sample_buffer[row, :] = np.array(sample)
             #np.insert(sample_buffer, row, np.array(sample), 0)
             # print(sample)
