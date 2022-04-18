@@ -19,8 +19,8 @@ class channel():
         self.active = False
         self.max_power = 0
         self.min_power= 0 
-        self.max_thresh = 1
-        self.min_thresh = 1
+        self.max_thresh = .01
+        self.min_thresh = 1.5
     
         self.raw_data = data.deque()
         self.prepped_data_frame = deque()

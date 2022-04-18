@@ -30,8 +30,8 @@ class SAD():
         self.num_inactive = 0
         self.active_count = 0        #number of speech events
         self.inactive_count = 0
-        self.active_thresh = 3
-        self.inactive_thresh = 2
+        self.active_thresh = 1
+        self.inactive_thresh = 10
         self.isSpeech = Boolean.boolean()
 
         #number of samples per packet
@@ -90,7 +90,7 @@ class SAD():
                 self.num_active = np.count_nonzero(struct.getBooleanTable()[:,sample_idx] == 1)   
                 
                 if self.isSpeech.getStatus():
-                    if self.num_active < 2:
+                    if self.num_active < 4:
                         self.inactive_count += 1
                     else:
                         self.inactive_count = 0
@@ -115,7 +115,7 @@ class SAD():
             
                 else:
                     #updating speech event count
-                    if self.num_active >= 2:
+                    if self.num_active >= 4:
                         self.active_count += 1
                     else:
                         self.active_count = 0
