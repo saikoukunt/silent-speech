@@ -87,10 +87,11 @@ class SAD():
                     pass
                     #do nothing
                 
-                self.num_active = np.count_nonzero(struct.getBooleanTable()[:,sample_idx] == 1)   
+                
+                self.num_active = np.count_nonzero(struct.getBooleanTable()[[0,1,4,5],sample_idx] == 1)   
                 
                 if self.isSpeech.getStatus():
-                    if self.num_active < 4:
+                    if self.num_active < 3:
                         self.inactive_count += 1
                     else:
                         self.inactive_count = 0
@@ -115,7 +116,7 @@ class SAD():
             
                 else:
                     #updating speech event count
-                    if self.num_active >= 4:
+                    if self.num_active >= 3:
                         self.active_count += 1
                     else:
                         self.active_count = 0
