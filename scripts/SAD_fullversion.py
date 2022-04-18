@@ -35,10 +35,10 @@ class SAD():
         self.isSpeech = Boolean.boolean()
 
         #number of samples per packet
-        self.num_samples = 1
+        self.num_samples = 240
 
         #frame_length is in ms
-        self.frame_length = 80
+        self.frame_length = 240
 
     #Each channel has access to the 'packet' struct which contains all 6 channels'
     #raw data as well as an array of booleans for channel activity
@@ -75,7 +75,7 @@ class SAD():
         return [deque(),deque(),deque(),deque(),deque(),deque()]
 
 
-    def global_thread(self, struct):
+    def global_thread(self, struct, output):
         while True:
             self.globalIsFinished.setStatus(False)
             speech_data = self.create_SpeechDataQueues()
@@ -98,11 +98,11 @@ class SAD():
                     if self.inactive_count >= self.inactive_thresh:
                         self.isSpeech.setStatus(False)
                         
-                        '''
+                        #6xsomething
+                        output_array = np.array([speech_data[0], speech_data[1], speech_data[2], speech_data[3], speech_data[4], speech_data[5]])
+                            
+                        output.put(output_array)
                         
-                        send data in speech_data to next module
-                        
-                        '''
                         speech_data = self.create_SpeechDataQueues()
                         
                     else:
@@ -143,19 +143,16 @@ class SAD():
 
     def run(self, input, output):
         
-        data_list = getDataStream()
-        #data_list = input.get()
-        '''
-        manipulate data from "getDataStream"
+        #240x6
+        data_list = input.get()
         
-        '''
         
-        data_stream1 = data_list[0]
-        data_stream2 = data_list[1]
-        data_stream3 = data_list[2]
-        data_stream4 = data_list[3]
-        data_stream5 = data_list[4]
-        data_stream6 = data_list[5]
+        data_stream1 = data_list[:,0]
+        data_stream2 = data_list[:,1]
+        data_stream3 = data_list[:,2]
+        data_stream4 = data_list[:,3]
+        data_stream5 = data_list[:,4]
+        data_stream6 = data_list[:,5]
         
         channel1 = garbo_SAD.channel(data_stream1, self.frame_length, 1)
         channel2 = garbo_SAD.channel(data_stream2, self.frame_length, 2)
@@ -164,7 +161,7 @@ class SAD():
         channel5 = garbo_SAD.channel(data_stream5, self.frame_length, 5)
         channel6 = garbo_SAD.channel(data_stream6, self.frame_length, 6)
         
-        data_struct = SAD_struct.sad_struct(data_list,self.num_samples)
+        data_struct = SAD_struct.sad_struct(np.transpose(data_list),self.num_samples)
         
         t1 = threading.Thread(target=self.channel_thread, args=(channel1, self.chan1_active, data_struct))
         t2 = threading.Thread(target=self.channel_thread, args=(channel2, self.chan2_active, data_struct)) 
@@ -172,7 +169,7 @@ class SAD():
         t4 = threading.Thread(target=self.channel_thread, args=(channel4, self.chan4_active, data_struct)) 
         t5 = threading.Thread(target=self.channel_thread, args=(channel5, self.chan5_active, data_struct))
         t6 = threading.Thread(target=self.channel_thread, args=(channel6, self.chan6_active, data_struct))
-        global_thread = threading.Thread(target=self.global_thread, args=(data_struct,))
+        global_thread = threading.Thread(target=self.global_thread, args=(data_struct,output))
         
         
         threads = [t1, t2, t3, t4, t5, t6, global_thread]
@@ -184,20 +181,19 @@ class SAD():
         while True:
             if self.globalIsFinished.getStatus():
                 
-                data_list = getDataStream()
-                #data_list = input.get()
-                '''
-                manipulate data from "getDataStream"
-        
-                '''
-                data_struct.setDataTable(data_list)
+                #data_list = getDataStream()
+                #240x6
+                data_list = input.get()
                 
-                channel1.setRaw(data_list[0])
-                channel2.setRaw(data_list[1])
-                channel3.setRaw(data_list[2])
-                channel4.setRaw(data_list[3])
-                channel5.setRaw(data_list[4])
-                channel6.setRaw(data_list[5])
+                
+                data_struct.setDataTable(np.transpose(data_list))
+                
+                channel1.setRaw(data_list[:,0])
+                channel2.setRaw(data_list[:,1])
+                channel3.setRaw(data_list[:,2])
+                channel4.setRaw(data_list[:,3])
+                channel5.setRaw(data_list[:,4])
+                channel6.setRaw(data_list[:,5])
                 
                 channel1.setHasData(True)
                 channel2.setHasData(True)
