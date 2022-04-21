@@ -1,5 +1,5 @@
 from multiprocessing import Process, Queue
-from acquisition import EMGStream
+from acquisition_realtime import EMGStream
 from filter_realtime import Filter
 from SAD_fullversion import SAD
 
