@@ -2,18 +2,22 @@ from multiprocessing import Process, Queue
 from acquisition_realtime import EMGStream
 from filter_realtime import Filter
 from SAD_new2 import SAD
+from decoder_realtime import Decoder
 
 stream = EMGStream()
 filter = Filter()
 sad = SAD()
+decoder = Decoder()
 
 q_stream_to_filter = Queue()
 q_filter_to_sad = Queue()
 q_sad_to_ml = Queue()
+q_ml_to_gui = Queue()
 
 p_stream = Process(target=stream.get_buffer, args=(q_stream_to_filter,))
 p_filter = Process(target=filter.run, args=(q_stream_to_filter,q_filter_to_sad,))
 p_sad = Process(target=sad.run, args=(q_filter_to_sad,q_sad_to_ml,))
+p_decoder = Process(target=decoder.run, args=(q_sad_to_ml,q_ml_to_gui))
 
 if __name__ == '__main__':
 	p_stream.start()
