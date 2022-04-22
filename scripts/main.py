@@ -1,7 +1,7 @@
 from multiprocessing import Process, Queue
 from acquisition_realtime import EMGStream
 from filter_realtime import Filter
-from SAD_new2 import SAD
+from SAD_final import SAD
 from decoder_realtime import Decoder
 
 stream = EMGStream()

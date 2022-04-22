@@ -26,7 +26,8 @@ class SAD():
         self.scaler = pickle.load(open("scaler.pkl", 'rb'))
         
         self.data = None
-        self.prev_data = deque([0,0,0,0,0,0]*self.packet_length)
+        self.prev_data = deque()
+        self.add_rows(self.prev_data, np.zeros((6,self.packet_length)), self.packet_length)
         self.speech_data = deque([])
 
     def rms(self, raw):
@@ -46,7 +47,7 @@ class SAD():
             for i in range(self.skip):
                 self.smooth_window.popleft()
 
-            self.smooth_window.extend(list(rms_data[start:end]))
+            self.smooth_window.extend((rms_data[start:end]).tolist())
             downsampled[i] = np.mean(self.smooth_window, dtype=np.float64)
             start += self.skip; end += self.skip; i += 1
 
@@ -58,7 +59,7 @@ class SAD():
 
     def add_rows(self, deq, data, n):
         for i in range(n):
-            deq.append(data[:,i])
+            deq.append((data[:,i]).tolist())
 
     def run(self, input, output):
         while True:
