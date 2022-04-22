@@ -88,10 +88,12 @@ class SAD():
         clf = pickle.load(open("classifier.pkl", 'rb'))
         scaler = pickle.load(open("scaler.pkl", 'rb'))
         speech_data = self.create_SpeechDataQueues()
+        previous_packet_queue = deque([0])
+        new_speech_data_flag = True
         
         while True:
             self.globalIsFinished.setStatus(False)
-            
+            previous_packet_queue.append(struct.getDataTable())
             #augment data, make a dataframe, predict on it, then send through fsm
             ready_data = np.zeros((6,12))
             
@@ -151,19 +153,65 @@ class SAD():
             
             for speech_sample_index, element in enumerate(speech_event):
                 
-                if element == 1:
-                    for channel_index in range(6):
-                        for raw_sample in range(20):
-                            raw_index = int((20 * speech_sample_index)+raw_sample)
-                            speech_data[channel_index].append(struct.getDataTableEntry(channel_index, raw_index))
-                            
-                else:
-                    #6xsomething
-                    output_array = np.array([speech_data[0], speech_data[1], speech_data[2], speech_data[3], speech_data[4], speech_data[5]])
-                            
-                    output.put(output_array)
+                #starting a new speech_data_queue
+                if new_speech_data_flag:
+                    #want to look back previous 5 downsampled samples
+                    if element == 1:
+                        #can use just current packet
+                        if speech_sample_index > 3:
+                            for past_index in range (speech_sample_index-4, speech_sample_index+1):
+                                for channel_index in range(6):
+                                    for raw_sample in range(20):
+                                        raw_index = int((20 * past_index)+raw_sample)
+                                        speech_data[channel_index].append(struct.getDataTableEntry(channel_index, raw_index))
                         
-                    speech_data = self.create_SpeechDataQueues()
+                        #too early in the current packet, must extend into previous packet
+                        else:
+                            #no previous packet to pull from
+                            if previous_packet_queue[0] == 0:
+                                pass
+                            else:
+                                previous_packet_range = -(speech_sample_index - 4)
+                                current_packet_range = 5 - previous_packet_range
+                                #data from previous packet
+                                for previous_packet_past_index in range(-previous_packet_range,0,1):
+                                    for channel_index in range(6):
+                                        for raw_sample in range(20):
+                                            raw_index = int((20 * previous_packet_past_index)+raw_sample)
+                                            speech_data[channel_index].append(previous_packet_queue[0].getDataTableEntry(channel_index, raw_index))
+                                
+                                #data from current packet
+                                for current_packet_index in range(current_packet_range):
+                                    for channel_index in range(6):
+                                        for raw_sample in range(20):
+                                            raw_index = int((20 * current_packet_index)+raw_sample)
+                                            speech_data[channel_index].append(struct.getDataTableEntry(channel_index, raw_index))
+                        
+                        new_speech_data_flag = False
+                            
+                    else:
+                        pass
+                    
+                else:
+                    if element == 1:
+                        for channel_index in range(6):
+                            for raw_sample in range(20):
+                                raw_index = int((20 * speech_sample_index)+raw_sample)
+                                speech_data[channel_index].append(struct.getDataTableEntry(channel_index, raw_index))
+                        
+                            
+                    else:
+                        #6xsomething
+                        output_array = np.array([speech_data[0], speech_data[1], speech_data[2], speech_data[3], speech_data[4], speech_data[5]])
+                                
+                        output.put(output_array)
+                            
+                        speech_data = self.create_SpeechDataQueues()
+                        
+                        new_speech_data_flag = True
+            
+            
+            previous_packet_queue.popleft()
             
             self.globalIsFinished.setStatus(True)
             
