@@ -64,7 +64,9 @@ class SAD():
     def run(self, input, output):
         while True:
             if (not input.empty()):
-                self.data = np.transpose(input.get()) # 6 x 240
+                
+                self.data = abs(np.transpose(input.get()))
+            
                 smoothed =  np.zeros((6,12))
                 for i in range(6):
                     smoothed[i,:] = self.smooth(self.rms(self.data[i,:]))
