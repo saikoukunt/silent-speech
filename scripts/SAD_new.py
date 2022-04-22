@@ -35,6 +35,8 @@ class SAD():
         #frame_length is in ms
         self.frame_length = 240
         
+        self.packet_data = 0
+        
         
         
     def rms(self, raw):
@@ -81,8 +83,12 @@ class SAD():
     def create_SpeechDataQueues(self):
         return [deque(),deque(),deque(),deque(),deque(),deque()]
     
+    
+    def convert_data(self, pipe_data):
+        return(np.transpose(pipe_data))
+    
 
-    def global_thread(self, struct, output):
+    def global_thread(self, output):
             
         
         clf = pickle.load(open("classifier.pkl", 'rb'))
@@ -93,12 +99,12 @@ class SAD():
         
         while True:
             self.globalIsFinished.setStatus(False)
-            previous_packet_queue.append(struct.getDataTable())
+            previous_packet_queue.append(np.copy(self.packet_data))
             #augment data, make a dataframe, predict on it, then send through fsm
             ready_data = np.zeros((6,12))
             
             for i in range(6):
-                data_rms = self.rms(struct.getDataTableRow(i))
+                data_rms = self.rms(self.packet_data[i,:])
                 res = self.smooth(data_rms)
                 ready_data[i] = res
             
@@ -163,7 +169,7 @@ class SAD():
                                 for channel_index in range(6):
                                     for raw_sample in range(20):
                                         raw_index = int((20 * past_index)+raw_sample)
-                                        speech_data[channel_index].append(struct.getDataTableEntry(channel_index, raw_index))
+                                        speech_data[channel_index].append(self.packet_data[channel_index, raw_index])
                         
                         #too early in the current packet, must extend into previous packet
                         else:
@@ -178,26 +184,27 @@ class SAD():
                                     for channel_index in range(6):
                                         for raw_sample in range(20):
                                             raw_index = int((20 * previous_packet_past_index)+raw_sample)
-                                            speech_data[channel_index].append(previous_packet_queue[0].getDataTableEntry(channel_index, raw_index))
+                                            speech_data[channel_index].append(previous_packet_queue[0][channel_index, raw_index])
                                 
                                 #data from current packet
                                 for current_packet_index in range(current_packet_range):
                                     for channel_index in range(6):
                                         for raw_sample in range(20):
                                             raw_index = int((20 * current_packet_index)+raw_sample)
-                                            speech_data[channel_index].append(struct.getDataTableEntry(channel_index, raw_index))
+                                            speech_data[channel_index].append(self.packet_data[channel_index, raw_index])
                         
                         new_speech_data_flag = False
                             
                     else:
                         pass
-                    
+                
+                #if speech_data_queue no longer new, add data like normal    
                 else:
                     if element == 1:
                         for channel_index in range(6):
                             for raw_sample in range(20):
                                 raw_index = int((20 * speech_sample_index)+raw_sample)
-                                speech_data[channel_index].append(struct.getDataTableEntry(channel_index, raw_index))
+                                speech_data[channel_index].append(self.packet_data[channel_index, raw_index])
                         
                             
                     else:
@@ -227,9 +234,9 @@ class SAD():
         data_list = input.get()
         
         
-        data_struct = SAD_struct.sad_struct(np.transpose(data_list),self.num_samples)
+        self.packet_data = self.convert_data(data_list)
         
-        global_thread = threading.Thread(target=self.global_thread, args=(data_struct,output))
+        global_thread = threading.Thread(target=self.global_thread, args=(output))
         
         global_thread.start()
         
@@ -242,7 +249,7 @@ class SAD():
                 data_list = input.get()
                 
                 
-                data_struct.setDataTable(np.transpose(data_list))
+                self.packet_data = self.convert_data(data_list)
                 
                 self.globalIsFinished.setStatus(False)        
         
