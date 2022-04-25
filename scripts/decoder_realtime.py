@@ -55,7 +55,7 @@ class Decoder():
 
                 # get the output
                 text = open("output.txt",'r')
-                text = text.read()
+                text = text.read().split(" ")[1]
                 print(text)
                 output.put(text)
                         
