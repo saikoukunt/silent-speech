@@ -4,12 +4,14 @@ from filter_realtime import Filter
 from SAD_final import SAD
 from decoder_realtime import Decoder
 from gui_2048 import Board
+from gui_text import GUI
 
 stream = EMGStream()
 filter = Filter()
 sad = SAD()
 decoder = Decoder()
-gui = Board()
+# gui = Board()
+gui = GUI()
 
 q_stream_to_filter = Queue()
 q_filter_to_sad = Queue()
