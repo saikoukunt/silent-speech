@@ -25,39 +25,43 @@ class Decoder():
         while True:
             if (not input.empty()):
                 data = input.get()
-
+                print(data)
+                    
+                os.system('rm -rf ../data/online')
+                os.system('mkdir ../data/online')
+                os.system('rm -rf ../exp/tri3a/decode') 
+                
+                print("removed")
+                
                 # create wav file
                 data = self.rescale_data(data)
                 out_f = os.path.join(self.wav_path,f'utt_{self.utt_num}.wav')
                 wavf.write(out_f, self.fs, data)
 
                 # create wav.scp
-                wavscp = open('data/online/wav.scp','w')
+                wavscp = open('../data/online/wav.scp','w')
                 path = os.path.join(os.getcwd(), self.wav_path)
                 fname = f'utt_{self.utt_num}.wav'
                 fullpath = path + '/' + fname
                 wavscp.write(f'utt_{self.utt_num}\t{fullpath}\n')
+                wavscp.close()
 
                 # create utt2spk
-                u2s = open('data/online/utt2spk','w')
+                u2s = open('../data/online/utt2spk','w')
                 u2s.write(f'utt_{self.utt_num}\t{self.sess}\n')
-
-                # clear old shit
-                for f in os.listdir('data/online'):
-                    os.remove(os.path.join('data/online',f))
-
-                for f in os.listdir('exp/tri3a/decode'):
-                    os.remove(os.path.join('exp/tri3a/decode',f))
-                os.rmdir('exp/tri3a/decode')
+                u2s.close()
 
                 # run decoding script 
-                os.system('cmd /k ". ./decoder.sh"') 
+                
+                os.system('cd ..;./decoder.sh') 
 
                 # get the output
-                text = open("output.txt",'r')
+                text = open("../output.txt",'r')
                 text = text.read().split(" ")[1]
                 print(text)
                 output.put(text)
+
+                
                         
                 self.utt_num += 1
 
