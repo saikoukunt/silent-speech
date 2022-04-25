@@ -6,14 +6,13 @@ import numpy as np
 class EMGStream:
     def __init__(self):
         self.sample_buffer = np.zeros(shape=(240, 7))
-       	self.macAddress = "20:19:07:00:80:D4" 
+        self.macAddress = "20:19:07:00:80:D4" 
         self.batteryThreshold = 30
-		
         self.device = BITalino(self.macAddress)
-              
+
 
     def get_buffer(self, output):
-        
+
         print(self.device.version())  
         bufferSize = 240
         channels = [0, 1, 2, 3, 4, 5] #[10, 10, 10, 10, 6, 6] bit
@@ -21,9 +20,9 @@ class EMGStream:
         self.device.battery(self.batteryThreshold)
 
         self.device.start(samplingRate, channels)
-        
-        while True:       
 
+        while True:
+            #print("RUNNING..")
             sample = self.device.read(bufferSize)
             sample = np.delete(sample, [1,2,3,4], 1)
             #print(sample)

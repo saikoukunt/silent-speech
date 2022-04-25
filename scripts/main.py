@@ -23,10 +23,12 @@ if __name__ == '__main__':
 	p_stream.start()
 	p_filter.start()
 	p_sad.start()
+	p_decoder.start()
 
 	p_stream.join()
 	p_filter.join()
 	p_sad.join()
+	p_decoder.join()
 
 
 	#while True:

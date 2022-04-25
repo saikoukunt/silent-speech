@@ -20,6 +20,7 @@ class SAD():
         self.skip = 20
 
         self.rms_window = deque([0,0,0,0,0])
+
         self.smooth_window = deque([0]*self.window_length)
 
         self.clf = pickle.load(open("classifier.pkl", 'rb'))
@@ -44,7 +45,7 @@ class SAD():
         downsampled = np.zeros(int(len(rms_data)/self.skip))
 
         while start < len(rms_data):
-            for i in range(self.skip):
+            for k in range(self.skip):
                 self.smooth_window.popleft()
 
             self.smooth_window.extend((rms_data[start:end]).tolist())
@@ -64,12 +65,13 @@ class SAD():
     def run(self, input, output):
         while True:
             if (not input.empty()):
-                
-                self.data = abs(np.transpose(input.get()))
-            
+                            
+                self.data = np.transpose(input.get())[1:,:]
+                #print(self.data)
+            	
                 smoothed =  np.zeros((6,12))
                 for i in range(6):
-                    smoothed[i,:] = self.smooth(self.rms(self.data[i,:]))
+                    smoothed[i,:] = self.smooth(self.rms(np.abs(self.data[i,:])))
 
                 X = pd.DataFrame({
                     "Chan1": smoothed[0],
@@ -78,6 +80,7 @@ class SAD():
                 })
                 X = self.scaler.transform(X)
                 predicted = self.clf.predict(X)
+                #print(predicted)
 
                 for i in range(len(smoothed)):
                     curr_data = self.data[:,i*self.skip:(i+1)*self.skip]
@@ -93,6 +96,7 @@ class SAD():
                         if self.inactive_count > self.inactive_thresh:
                             self.isSpeech = False
                             # speech event is over, send the speech data
+                            print(np.array(self.speech_data))
                             output.put(np.array(self.speech_data))
                             self.speech_data = deque([])
                         else:
@@ -108,7 +112,9 @@ class SAD():
 
                         if self.active_count > self.active_thresh:
                             # start a new speech event
-                            self.add_rows(self.speech_data, np.transpose(np.array(self.prev_data))[:, -5*self.skip:], 100) # previous 100 samples
+                            #print(np.array(self.prev_data).shape)
+                            self.isSpeech = True
+                            self.add_rows(self.speech_data, np.transpose(np.array(self.prev_data)), 240) # previous samples
                             self.add_rows(self.speech_data, curr_data, 20) # current 20 samples
 
                     # update prev
