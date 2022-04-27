@@ -14,6 +14,7 @@ class SAD():
         self.active_thresh = 3 
         self.inactive_thresh = 7
         self.isSpeech = False
+        self.min_speech_size = 400
 
         self.packet_length = 240
         self.window_length = 40
@@ -93,8 +94,9 @@ class SAD():
                         # check if is speech
                         if self.inactive_count > self.inactive_thresh:
                             self.isSpeech = False
-                            # speech event is over, send the speech data
-                            output.put(np.array(self.speech_data))
+                            # speech event is over, send the speech data if long enough
+                            if np.array(self.speech_data).shape[0] > self.min_speech_size:
+                                output.put(np.array(self.speech_data))
                             self.speech_data = deque([])
                         else:
                             self.add_rows(self.speech_data, curr_data, 20)
