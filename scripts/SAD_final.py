@@ -14,7 +14,7 @@ class SAD():
         self.active_thresh = 3 
         self.inactive_thresh = 7
         self.isSpeech = False
-        self.min_speech_size = 400
+        self.min_speech_size = 540
 
         self.packet_length = 240
         self.window_length = 40
@@ -115,7 +115,7 @@ class SAD():
                             # start a new speech event
                             #print(np.array(self.prev_data).shape)
                             self.isSpeech = True
-                            self.add_rows(self.speech_data, np.transpose(np.array(self.prev_data)), 240) # previous samples
+                            self.add_rows(self.speech_data, np.transpose(np.array(self.prev_data))[:,-12*self.skip:], 240) # previous samples
                             self.add_rows(self.speech_data, curr_data, 20) # current 20 samples
 
                     # update prev
