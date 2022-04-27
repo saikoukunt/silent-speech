@@ -35,7 +35,7 @@ class Decoder():
 
                 command = subprocess.run(["rm", "-rf", "../data/online"], stdout=subprocess.DEVNULL)
                 command = subprocess.run(["mkdir", "../data/online"], stdout=subprocess.DEVNULL)
-                comand = subprocess.run(["rm", "-rf", "../exp/tri3a/decode"], stdout=subprocess.DEVNULL)
+                command = subprocess.run(["rm", "-rf", "../exp/tri3a/decode"], stdout=subprocess.DEVNULL)
 
                 print("removed")
 
