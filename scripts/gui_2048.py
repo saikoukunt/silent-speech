@@ -1,323 +1,120 @@
+import func_2048
+
+from tkinter import Frame, Label, CENTER
 import random
-import copy
-import pygame
-from sympy import false
 
-class Board():
-    def __init__(self, size = 4, score = 0, array = [], temp = False):
-        self.width = 600
-        self.height = 700
-        self.win = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption('2048')
 
-        pygame.font.init()
-        self.font = pygame.font.SysFont('Comic Sans MS', 30)
+grid_coord = (500,4,10)
+bg_grid,bg_empty_cell = "#92877d","#9e948a"
+bg_cell = {2: "#eee4da", 4: "#ede0c8", 8: "#f2b179",
+            16: "#f59563", 32: "#f67c5f", 64: "#f65e3b",
+            128: "#edcf72", 256: "#edcc61", 512: "#edc850",
+            1024: "#edc53f", 2048: "#edc22e"}
+cell_clr = {2: "#776e65", 4: "#776e65", 8: "#f9f6f2", 16: "#f9f6f2",
+                32: "#f9f6f2", 64: "#f9f6f2", 128: "#f9f6f2",
+                256: "#f9f6f2", 512: "#f9f6f2", 1024: "#f9f6f2",
+                2048: "#f9f6f2"}
+f = ("Verdana",40,"bold")
 
-        self.thickness = 50
+ctrls_alt = ["\'\\uf700\'","\'\\uf702\'","\'\\uf701\'","\'\\uf703\'"]
+# ctrls1 = ["'w'","'a'","'s'","'d'"]
+# ctrls2 = ["'j'","'h'","'k'","'l'"]
 
-        self.size = size
-        self.array = array
-        if array == []:
-            for i in range(size):
-                self.array.append([0] * size)
-        self.score = score
-        self.temp = temp
-        self.rect = (self.width / self.thickness, self.height - self.width * ((self.thickness - 1) / self.thickness), self.width * ((self.thickness - 2) / self.thickness), self.width * ((self.thickness - 2) / self.thickness))
+ctrls1 = ["up","left","down","right"]
+ctrls2 = ["one","two","three","four"]
 
-    def add_tile(self):
-        # Adds a tile to the game board (2 with 90% chance and 4 with 10% chance)
-        open_spots = []
-        for x in range(self.size):
-            for y in range(self.size):
-                if self.array[x][y] == 0:
-                    open_spots.append([x, y])
-        if not open_spots:
-            return
-        new_spot = random.choice(open_spots)
-        x, y = new_spot[0], new_spot[1]
-        self.array[x][y] = random.choices([2, 4], weights = [0.9, 0.1])[0]
+
+class GameDisplay(Frame):
+    def __init__(self, input):
+        Frame.__init__(self)
+
+        self.grid()
+        self.input = input
+        self.master.title('2048 Game in Python')
+        # self.master.bind("<Key>", self.key_down)
+
+        self.cells,self.old_mat = [],[]
+        self.begin_game()
+        self.M = func_2048.reset(grid_coord[1])
+        self.update_game()
+        
+        self.commands = {ctrls1[0]:func_2048.move_up,ctrls1[1]:func_2048.move_left,
+                        ctrls1[2]:func_2048.move_down,ctrls1[3]:func_2048.move_right,
+                        ctrls2[0]:func_2048.move_up,ctrls2[1]:func_2048.move_left,
+                        ctrls2[2]:func_2048.move_down,ctrls2[3]:func_2048.move_right}
+
+        self.update()
+        self.mainloop()
     
-    def move(self):
-        # Move the board based on the current key being pressed
-        keys = pygame.key.get_pressed()
+    def begin_game(self):
+        bg = Frame(self,bg=bg_grid,height=grid_coord[0],width=grid_coord[0])
+        bg.grid()
+
+        for i in range(grid_coord[1]):
+            r = []
+            for j in range(grid_coord[1]):
+                ele_size = grid_coord[0]/grid_coord[1]
+                ele = Frame(bg,bg=bg_empty_cell,height=ele_size,width=ele_size)
+                ele.grid(row=i,column=j,padx=grid_coord[2],pady=grid_coord[2])
+                ele_text = Label(master=ele,text="",bg=bg_empty_cell,justify=CENTER,font=f,width=5,height=2)
+                ele_text.grid()
+                r.append(ele_text)
+            self.cells.append(r)
         
-        if keys[pygame.K_LEFT]:
-            temp_board = Board(array = copy.deepcopy(self.array), temp = True)
-            temp_board.move_left()
-            if temp_board.array != self.array:
-                self.move_left()
-        
-        elif keys[pygame.K_RIGHT]:
-            temp_board = Board(array = copy.deepcopy(self.array), temp = True)
-            temp_board.move_right()
-            if temp_board.array != self.array:
-                self.move_right()
+        print('Controls:')
+        print("W or J: MOVE UP \t\t  A or H: MOVE LEFT")
+        print("S or K: MOVE DOWN\t\t  D or L: MOVE RIGHT")
 
-        elif keys[pygame.K_UP]:
-            temp_board = Board(array = copy.deepcopy(self.array), temp = True)
-            temp_board.move_up()
-            if temp_board.array != self.array:
-                self.move_up()
-
-        elif keys[pygame.K_DOWN]:
-            temp_board = Board(array = copy.deepcopy(self.array), temp = True)
-            temp_board.move_down()
-            if temp_board.array != self.array:
-                self.move_down()
-        
-
-    def move_left(self):
-        # Move the board left, combining tiles as they move
-        for row in self.array:
-            for x in range(self.size):
-                last_tile = 0
-                for i in range(x-1, last_tile-1, -1):
-                    if row[i] == 0:
-                        if i == last_tile:
-                            row[i] = int(row[x])
-                            row[x] = 0
-                            break
-                    elif row[i] == row[x]:
-                        row[i] *= 2
-                        self.score += row[i]
-                        row[x] = 0
-                        last_tile = i + 1
-                        break
-                    else:
-                        row[i+1] = int(row[x])
-                        if i + 1 != x:
-                            row[x] = 0
-                        break
-        if not self.temp:
-            self.add_tile()
-        if self.check_loss():
-            self.restart()
-
-    def move_right(self):
-        # Move the board right, combining tiles as they move
-        for row in self.array:
-            row.reverse()
-            for x in range(self.size):
-                last_tile = 0
-                for i in range(x-1, last_tile-1, -1):
-                    if row[i] == 0:
-                        if i == last_tile:
-                            row[i] = int(row[x])
-                            row[x] = 0
-                            break
-                    elif row[i] == row[x]:
-                        row[i] *= 2
-                        self.score += row[i]
-                        row[x] = 0
-                        last_tile = i + 1
-                        break
-                    else:
-                        row[i+1] = int(row[x])
-                        if i + 1 != x:
-                            row[x] = 0
-                        break
-            row.reverse()
-        if not self.temp:
-            self.add_tile()
-        if self.check_loss():
-            self.restart()
-
-    def move_up(self):
-        # Move the board up, combining tiles as they move
-        for y in range(self.size):
-            col = []
-            for x in range(self.size):
-                col.append(int(self.array[x][y]))
-            for x in range(self.size):
-                last_tile = 0
-                for i in range(x-1, last_tile-1, -1):
-                    if col[i] == 0:
-                        if i == last_tile:
-                            col[i] = int(col[x])
-                            col[x] = 0
-                            break
-                    elif col[i] == col[x]:
-                        col[i] *= 2
-                        self.score += col[i]
-                        col[x] = 0
-                        last_tile = i + 1
-                        break
-                    else:
-                        col[i+1] = int(col[x])
-                        if i + 1 != x:
-                            col[x] = 0
-                        break
-            for x in range(self.size):
-                self.array[x][y] = col[x]
-        if not self.temp:
-            self.add_tile()
-        if self.check_loss():
-            self.restart()
-
-    def move_down(self):
-        # Move the board down, combining tiles as they move
-        for y in range(self.size):
-            col = []
-            for x in range(self.size):
-                col.append(int(self.array[x][y]))
-            col.reverse()
-            for x in range(self.size):
-                last_tile = 0
-                for i in range(x-1, last_tile-1, -1):
-                    if col[i] == 0:
-                        if i == last_tile:
-                            col[i] = int(col[x])
-                            col[x] = 0
-                            break
-                    elif col[i] == col[x]:
-                        col[i] *= 2
-                        self.score += col[i]
-                        col[x] = 0
-                        last_tile = i + 1
-                        break
-                    else:
-                        col[i+1] = int(col[x])
-                        if i + 1 != x:
-                            col[x] = 0
-                        break
-            col.reverse()
-            for x in range(self.size):
-                self.array[x][y] = col[x]
-        if not self.temp:
-            self.add_tile()
-        if self.check_loss():
-            self.restart()
-
-    def draw(self):
-        # Score
-        text = self.font.render('Score : ' + str(self.score), True, (0,0,0))
-        textRect = text.get_rect()
-        textRect.center = (self.width / 2, 50)
-        self.win.blit(text, textRect)
-
-        # Main Board Space
-        pygame.draw.rect(self.win, (160, 160, 160), self.rect)
-
-        # Tiles
-        length = (self.thickness - 2 - self.size - 1) * self.width / (self.thickness * self.size)
-        for x in range(self.size):
-            for y in range(self.size):
-                rect = (self.rect[0] + (self.width * (x + 1) / self.thickness) + length * x, self.rect[1] + (self.width * (y + 1) / self.thickness) + length * y, length, length)
-                pygame.draw.rect(self.win, self.color(self.array[y][x]), rect)
-                # Tile Value
-                if self.array[y][x] != 0:
-                    text = self.font.render(str(self.array[y][x]), True, (0,0,0))
-                    textRect = text.get_rect()
-                    textRect.center = (rect[0] + length / 2, rect[1] + length / 2)
-                    self.win.blit(text, textRect)
-
-    def board_full(self):
-        # Check if there are any open spots on the board
-        for row in self.array:
-            if 0 in row:
-                return false
-        return True
-
-    def check_loss(self):
-        # We can only lose if every tile is filled so check that first
-        if not self.board_full():
-            return False
-
-        # Check if it is possible to move in any of the four directions
-        temp_board = Board(array = copy.deepcopy(self.array))
-        temp_board.move_left()
-        if temp_board.array != self.array:
-            return False
-
-        temp_board = Board(array = copy.deepcopy(self.array))
-        temp_board.move_up()
-        if temp_board.array != self.array:
-            return False
-
-        temp_board = Board(array = copy.deepcopy(self.array), temp = True)
-        temp_board.move_right()
-        if temp_board.array != self.array:
-            return False
-
-        temp_board = Board(array = copy.deepcopy(self.array), temp = True)
-        temp_board.move_down()
-        if temp_board.array != self.array:
-            return False
-
-        return True
-
-    def restart(self):
-        # Create a fresh board and place two starting tiles
-        self.score = 0
-        self.array = []
-        for i in range(self.size):
-            self.array.append([0] * self.size)
-        self.add_tile()
-        self.add_tile()
-
-    def print_board(self):
-        for row in self.array:
-            print(row)
-
-    def color(self, val):
-        colors = {
-            0: (180, 180, 180),
-            2: (238, 228, 218),
-            4: (237, 224, 200),
-            8: (242, 177, 121),
-            16: (245, 149, 99),
-            32: (246, 124, 95),
-            64: (246, 94, 59),
-            128: (237, 207, 114),
-            256: (237, 204, 97),
-            512: (237, 197, 63),
-            1024: (237, 197, 63),
-            2048: (237, 197, 30),
-            4096: (100, 184, 145),
-            8192: (56, 140, 100),
-            16384: (56, 107, 126),
-        }
-        return colors[val]
-
-    def redraw_window(self):
-        self.win.fill((255, 255, 255))
-        self.font.render('Score : ', False, (0, 0, 0))
-        self.draw()
-        pygame.display.update()
-
-    def run(self, input):
-        
-        clock = pygame.time.Clock()
+    def update_game(self):
+        for i in range(grid_coord[1]):
+            for j in range(grid_coord[1]):
+                if (self.M[i][j]):
+                    self.cells[i][j].configure(text=str(self.M[i][j]),bg=bg_cell[self.M[i][j]],fg=cell_clr[self.M[i][j]])
+                else:
+                    self.cells[i][j].configure(text="",bg=bg_empty_cell)
+        self.update_idletasks()
     
-        # Changes grid size
-        current_size = 4
+    # def key_down(self,event):
+    #     char_key = repr(event.char)
+    #     if (char_key in self.commands):
+    #         self.M,flag = self.commands[char_key](self.M)
+    #         if (flag):
+    #             self.M = func_2048.inst_two(self.M)
+    #             self.old_mat.append(self.M)
+    #             self.update_game()
+    #             if (func_2048.state(self.M) == 0):
+    #                 self.cells[1][1].configure(text="You",bg=bg_empty_cell)
+    #                 self.cells[1][2].configure(text="Lose!",bg=bg_empty_cell)
+    #             if (func_2048.state(self.M) == 1):
+    #                 self.cells[1][1].configure(text="You",bg=bg_empty_cell)
+    #                 self.cells[1][2].configure(text="Win!",bg=bg_empty_cell)
+    #     elif (char_key == "'b'" and len(self.old_mat)>1):
+    #         self.M = self.old_mat.pop()
+    #         self.update_game()
+    #         print('Step retraced. Total steps: ',len(self.old_mat))
+    def update(self):
+        if not self.input.empty():
+            text = self.input.get()
+            print(text)
+            if text in self.commands:
+                self.M, flag = self.commands[text](self.M)
+                if flag:
+                    self.M = func_2048.inst_two(self.M)
+                    self.old_mat.append(self.M)
+                    self.update_game()
+                    if (func_2048.state(self.M) == 0):
+                        self.cells[1][1].configure(text="You",bg=bg_empty_cell)
+                        self.cells[1][2].configure(text="Lose!",bg=bg_empty_cell)
+                    if (func_2048.state(self.M) == 1):
+                        self.cells[1][1].configure(text="You",bg=bg_empty_cell)
+                        self.cells[1][2].configure(text="Win!",bg=bg_empty_cell)
+        self.after(200,self.update)
 
-        # Creates a board an populates it with 2 starting tiles
-        self.restart()
-
-        # Main loop
-        while True:
-            clock.tick(10)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    run = False
-                    pygame.quit()
-
-            # This enables keyboard interaction with arrow keys
-            # Comment it out if you want to test some other form of input
-            # b.move()
-
-            # ADD NEW INPUT CONDITIONS HERE
-
-            if not input.empty():
-                dir = input.get()
-                if dir == 'left':
-                    self.move_left()
-                if dir == 'right':
-                    self.move_right()
-                if dir == 'up':
-                    self.move_up()
-                if dir == 'down':
-                    self.move_down
-
-            self.redraw_window()
+def run(input):    
+    game = GameDisplay(input)
+    lar,hi = 0,0
+    for i in range(len(game.M)):
+        hi = max(game.M[i])
+        if (lar < hi):
+            lar = hi
+    print('You Score is: ',lar)

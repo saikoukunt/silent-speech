@@ -3,7 +3,7 @@ from acquisition_realtime import EMGStream
 from filter_realtime import Filter
 from SAD_final import SAD
 from decoder_realtime import Decoder
-from gui_2048 import Board
+import gui_2048
 from gui_text import GUI
 # import gui_main
 
@@ -11,7 +11,6 @@ stream = EMGStream()
 filter = Filter()
 sad = SAD()
 decoder = Decoder()
-# gui = Board()
 gui = GUI()
 
 q_stream_to_filter = Queue()
@@ -25,7 +24,7 @@ p_sad = Process(target=sad.run, args=(q_filter_to_sad,q_sad_to_ml,))
 p_decoder = Process(target=decoder.run, args=(q_sad_to_ml,q_ml_to_gui))
 p_gui = Process(target=gui.run, args=(q_ml_to_gui,))
 
-# p_gui = Process(target=gui_main.run, args=(q_ml_to_gui,))
+# p_gui = Process(target=gui_2048.run, args=(q_ml_to_gui,))
 
 if __name__ == '__main__':
 	p_stream.start()
