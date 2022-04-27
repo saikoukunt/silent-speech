@@ -11,7 +11,7 @@ class SAD():
 
         self.active_count = 0
         self.inactive_count = 0
-        self.active_thresh = 3 
+        self.active_thresh = 3
         self.inactive_thresh = 7
         self.isSpeech = False
 

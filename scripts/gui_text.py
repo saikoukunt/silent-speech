@@ -27,7 +27,7 @@ class GUI(tk.Tk):
             self,
             text=f'{self.prev_word}',
             font=("Helvetica Neue Thin", 100),
-            foreground=-'#888888'
+            foreground='#888888'
         )
         self.prev_2_l = ttk.Label(
             self,

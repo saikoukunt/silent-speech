@@ -1,6 +1,9 @@
 import os
 import scipy.io.wavfile as wavf
 import shutil
+from playsound import playsound
+from gtts import gTTS
+
 
 class Decoder():
     def __init__(self):
@@ -57,11 +60,14 @@ class Decoder():
 
                 # get the output
                 text = open("../output.txt",'r')
-                text = text.read().split(" ")[1]
+                text = " ".join(text.read().split(" ")[1:])
                 print(text)
                 output.put(text)
-
                 
+                #speech = gTTS(text=self.word, lang='en', slow=False)
+                #speech.save("audio.mp3")
+                #playsound("audio.mp3")
+
                         
                 self.utt_num += 1
 
