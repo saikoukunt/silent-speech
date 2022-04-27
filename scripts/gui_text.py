@@ -12,9 +12,9 @@ class GUI(tk.Tk):
         self.geometry(f'{width}x{height}') 
         self.resizable(False, False)
 
-        self.word = ""
-        self.prev_word = ""
-        self.prev_2 = ""
+        self.word = "test"
+        self.prev_word = "test"
+        self.prev_2 = "test"
 
         self.word_l = ttk.Label(
             self, 
