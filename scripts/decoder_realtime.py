@@ -1,5 +1,3 @@
-from kaldi.asr import GmmLatticeFasterRecognizer, LatticeFasterDecoderOptions
-from kaldi.util.table import SequentialMatrixReader
 import os
 import scipy.io.wavfile as wavf
 import subprocess
@@ -9,6 +7,7 @@ class Decoder():
         self.utt_num = 0
         self.fs = 1000
         self.wav_path = "./wavs/"
+        self.sess = 0
 
         command = subprocess.run(["rm", "-rf", "../output.txt"], stdout=subprocess.DEVNULL)
 
@@ -68,4 +67,3 @@ class Decoder():
                         
                 self.utt_num += 1
 
-    

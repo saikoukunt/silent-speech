@@ -21,6 +21,7 @@ class SAD():
         self.skip = 20
 
         self.rms_window = deque([0,0,0,0,0])
+
         self.smooth_window = deque([0]*self.window_length)
 
         self.clf = pickle.load(open("classifier.pkl", 'rb'))
@@ -66,7 +67,7 @@ class SAD():
         while True:
             if (not input.empty()):
                 
-                self.data = np.transpose(input.get())
+                self.data = np.transpose(input.get())[1:,:]
             
                 smoothed =  np.zeros((6,12))
                 for i in range(6):
@@ -80,6 +81,7 @@ class SAD():
                 })
                 X = self.scaler.transform(X)
                 predicted = self.clf.predict(X)
+                #print(predicted)
 
                 for i in range(len(smoothed)):
                     curr_data = self.data[:,i*self.skip:(i+1)*self.skip]
@@ -111,7 +113,9 @@ class SAD():
 
                         if self.active_count > self.active_thresh:
                             # start a new speech event
-                            self.add_rows(self.speech_data, np.transpose(np.array(self.prev_data))[:, -5*self.skip:], 100) # previous 100 samples
+                            #print(np.array(self.prev_data).shape)
+                            self.isSpeech = True
+                            self.add_rows(self.speech_data, np.transpose(np.array(self.prev_data)), 240) # previous samples
                             self.add_rows(self.speech_data, curr_data, 20) # current 20 samples
 
                     # update prev
