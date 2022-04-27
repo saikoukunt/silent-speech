@@ -2,19 +2,15 @@ from kaldi.asr import GmmLatticeFasterRecognizer, LatticeFasterDecoderOptions
 from kaldi.util.table import SequentialMatrixReader
 import os
 import scipy.io.wavfile as wavf
+import subprocess
 
 class Decoder():
     def __init__(self):
-        decoder_opts = LatticeFasterDecoderOptions()
-        decoder_opts.beam = 13.0
-        decoder_opts.lattice_beam = 6.0
-
-        self.asr = GmmLatticeFasterRecognizer.from_files("final.mdl", "HCLG.fst", "words.txt", decoder_opts)
-        self.feats_rspec = ("ark:compute-mfcc-feats --config=models/silent-speech/conf/mfcc.conf "
-               "scp:wav.scp ark:- |")
         self.utt_num = 0
         self.fs = 1000
         self.wav_path = "./wavs/"
+
+        command = subprocess.run(["rm", "-rf", "../output.txt"], stdout=subprocess.DEVNULL)
 
     def rescale_data(self, data):
         # convert back to ADC value
@@ -33,9 +29,13 @@ class Decoder():
             if (not input.empty()):
                 data = input.get()
 
-                os.system('rm -rf ../data/online')
-                os.system('mkdir ../data/online')
-                os.system('rm -rf ../exp/tri3a/decode') 
+                # os.system('rm -rf ../data/online')
+                # os.system('mkdir ../data/online')
+                # os.system('rm -rf ../exp/tri3a/decode') 
+
+                command = subprocess.run(["rm", "-rf", "../data/online"], stdout=subprocess.DEVNULL)
+                command = subprocess.run(["mkdir", "../data/online"], stdout=subprocess.DEVNULL)
+                comand = subprocess.run(["rm", "-rf", "../exp/tri3a/decode"], stdout=subprocess.DEVNULL)
 
                 print("removed")
 
@@ -58,7 +58,9 @@ class Decoder():
                 u2s.close()
 
                 # decode
-                os.system('cd ..;./decoder.sh')
+                # os.system('cd ..;./decoder.sh')
+                command = subprocess.run(["./decoder.sh"], cwd=os.path.join(os.getcwd(),"/../"), stdout=subprocess.DEVNULL)
+
                 text = open("../output.txt",'r')
                 text = text.read()
                 print(text)
