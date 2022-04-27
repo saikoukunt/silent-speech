@@ -33,24 +33,36 @@ class Decoder():
             if (not input.empty()):
                 data = input.get()
 
+                os.system('rm -rf ../data/online')
+                os.system('mkdir ../data/online')
+                os.system('rm -rf ../exp/tri3a/decode') 
+
+                print("removed")
+
                 # create wav file
                 data = self.rescale_data(data)
                 out_f = os.path.join(self.wav_path,f'utt_{self.utt_num}.wav')
                 wavf.write(out_f, self.fs, data)
 
                 # create wav.scp
-                wavscp = open('./wav.scp')
+                wavscp = open('../data/online/wav.scp','w')
                 path = os.path.join(os.getcwd(), self.wav_path)
                 fname = f'utt_{self.utt_num}.wav'
                 fullpath = path + '/' + fname
                 wavscp.write(f'utt_{self.utt_num}\t{fullpath}\n')
+                wavscp.close()
+
+                # create utt2spk
+                u2s = open('../data/online/utt2spk','w')
+                u2s.write(f'utt_{self.utt_num}\t{self.sess}\n')
+                u2s.close()
 
                 # decode
-                with SequentialMatrixReader(self.feats_rspec) as feats_reader:
-                    for (fkey, feats) in feats_reader:
-                        out = self.asr.decode(feats)
-                        print(out["text"])
-                        output.put(out["text"])
+                os.system('cd ..;./decoder.sh')
+                text = open("../output.txt",'r')
+                text = text.read()
+                print(text)
+                output.put(text)
                         
                 self.utt_num += 1
 

@@ -44,7 +44,7 @@ class SAD():
         downsampled = np.zeros(int(len(rms_data)/self.skip))
 
         while start < len(rms_data):
-            for i in range(self.skip):
+            for k in range(self.skip):
                 self.smooth_window.popleft()
 
             self.smooth_window.extend((rms_data[start:end]).tolist())
@@ -65,11 +65,12 @@ class SAD():
         while True:
             if (not input.empty()):
                 
-                self.data = abs(np.transpose(input.get()))
+                self.data = np.transpose(input.get())
             
                 smoothed =  np.zeros((6,12))
                 for i in range(6):
-                    smoothed[i,:] = self.smooth(self.rms(self.data[i,:]))
+                    if i in [0,1,5]:
+                        smoothed[i,:] = self.smooth(self.rms(np.abs(self.data[i,:])))
 
                 X = pd.DataFrame({
                     "Chan1": smoothed[0],
